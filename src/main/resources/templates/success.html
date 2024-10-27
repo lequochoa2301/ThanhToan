@@ -3,10 +3,98 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Payment Success</title>
+    <title>Success Page</title>
+    <style>
+        table {
+            width: 50%;
+            border-collapse: collapse;
+            margin: 20px;
+        }
+        table, th, td {
+            border: 1px solid black;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+        }
+    </style>
 </head>
 <body>
+
 <h1>Payment Successful</h1>
-<p>Your payment has been processed successfully. Thank you!</p>
+
+<table>
+    <tr>
+        <th>Thông tin</th>
+        <th>Chi tiết</th>
+    </tr>
+    <tr>
+        <td>Order ID</td>
+        <td id="order-id"></td>
+    </tr>
+    <tr>
+        <td>Payer ID</td>
+        <td id="payer-id"></td>
+    </tr>
+    <tr>
+        <td>Tên người thanh toán</td>
+        <td id="payer-name"></td>
+    </tr>
+    <tr>
+        <td>Địa chỉ</td>
+        <td id="payer-address"></td>
+    </tr>
+    <tr>
+        <td>Email</td>
+        <td id="payer-email"></td>
+    </tr>
+    <tr>
+        <td>Số tiền đã thanh toán</td>
+        <td id="payment-amount"></td>
+    </tr>
+    <tr>
+        <td>Status thanh toán</td>
+        <td id="payment-status"></td>
+    </tr>
+</table>
+
+<script>
+    // Lấy thông tin response từ URL
+    var responseParam = new URLSearchParams(window.location.search).get('response');
+    var response = JSON.parse(decodeURIComponent(responseParam));
+
+    // Hiển thị thông tin trong bảng
+    document.getElementById('order-id').innerText = response.orderID;
+    document.getElementById('payer-id').innerText = response.payerID;
+    document.getElementById('payer-name').innerText = response.details.payer.name.given_name;
+    document.getElementById('payer-address').innerText = response.details.payer.address.country_code;
+    document.getElementById('payer-email').innerText = response.details.payer.email_address;
+    document.getElementById('payment-amount').innerText = response.amount + " USD"; // Sử dụng số tiền từ response
+    document.getElementById('payment-status').innerText = response.details.status;
+
+    // Gửi thông tin thanh toán lên server
+    var paymentData = {
+        orderId: response.orderID,
+        payerId: response.payerID,
+        payerName: response.details.payer.name.given_name,
+        payerAddress: response.details.payer.address.country_code,
+        payerEmail: response.details.payer.email_address,
+        paymentStatus: response.details.status,
+        paymentAmount: parseFloat(response.amount),
+        currencyCode: "USD"  // Hoặc sử dụng response.details.purchase_units[0].amount.currency_code nếu muốn
+    };
+
+    fetch('/api/payments/save', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(paymentData)
+    })
+    .then(response => response.json())
+    .then(data => console.log('Payment saved:', data))
+    .catch(error => console.error('Error:', error));
+</script>
+
 </body>
 </html>
