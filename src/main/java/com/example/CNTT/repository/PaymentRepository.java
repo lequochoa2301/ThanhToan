@@ -1,0 +1,9 @@
+package com.example.CNTT.repository;
+
+import com.example.CNTT.entity.Payment;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+@Repository
+public interface PaymentRepository extends JpaRepository<Payment, Long> {
+}
